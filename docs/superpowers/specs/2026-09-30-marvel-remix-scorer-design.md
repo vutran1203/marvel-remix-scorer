@@ -24,7 +24,7 @@ Cuối ván (hoặc trong ván để tính thử), mỗi người chọn các l�
 | Nhập tay bài | Chọn lá từ danh sách/lưới ảnh; web tự tính mọi bonus |
 | Thiết bị | Dùng chung 1 máy, nhập lần lượt từng người |
 | Lựa chọn của người chơi | Web tự thử mọi phương án, lấy điểm cao nhất, hiển thị lựa chọn đã dùng |
-| Loki | Người chơi nhập lá đã rút (chọn lá hoặc gõ số power) |
+| Loki | Người chơi gõ số power của lá đã rút (chưa nhập → tính 0 + cảnh báo) |
 | Hiển thị lá | Ảnh thật đã xử lý (cắt nền, xoay thẳng, nén WebP) |
 | Ngôn ngữ | Giao diện tiếng Việt; tên lá + text luật giữ tiếng Anh |
 | Tính năng thêm | Chặn chọn trùng lá giữa người chơi; điểm tạm tính cập nhật trực tiếp; thư viện lá chia tab theo loại + tìm theo tên |
@@ -153,7 +153,8 @@ tests/
 ## 8. Test
 
 - Ví dụ trang 7: Captain America, Colossus, Valkyrie, Vision, Mystique, Vibranium Shield,
-  Falling Debris → **77** (14/6/7/3/14/9/24).
+  Falling Debris → **81** (14/6/7/3/14/9/28). Sách in 77 vì bỏ sót tag Strength của
+  Vibranium Shield (lá thật có Strength + Range).
 - FAQ: Avoid Crossfire + Lockheed + Storm + Cyclops → bonus **+27**; + Hawkeye + Lockheed → **21**;
   Hack In + Build Gadgets → +13 mỗi tag Tech; Shadowcat + Factory + Hidden Lair → +4 một lần;
   Assembled + Hawkeye + She-Hulk + Wolverine → +12.
@@ -176,6 +177,15 @@ Cần repo GitHub (người dùng tạo, hoặc tạo bằng `gh` khi được p
 5. Giao diện.
 6. Deploy.
 
-## Phụ lục: Cần xác nhận
+## Phụ lục: Dữ liệu & cách hiểu luật đã chốt
 
-(Sẽ điền khi dựng dữ liệu lá bài ở bước 3.)
+- Đủ 79 lá (81 ảnh; Jean Grey và Thor mỗi lá chụp 2 lần). Ánh xạ ảnh → lá ở `scripts/card-images.json`.
+- Số thứ tự lá (`number`) suy theo thứ tự chữ cái trong từng loại; chỉ dùng để sắp xếp.
+- Selene blank đúng 1 HERO/ALLY (web chọn lá có lợi nhất) và trừ base power của lá đó.
+- Berserk: phạt −3 × (số HERO/ALLY − 1 + số tag Urban).
+- Rogue chép base power (mặt hiện tại) và tối đa 1 tag của HERO khác đang hoạt động; không chép thì power 0.
+- Xavier Mansion / Moira: "count one tag twice" = tag đó được đếm 2 lần ở mọi luật đếm tag.
+- Kang đếm số loại tag khác nhau trên các lá đang hoạt động.
+- Magneto xóa mọi tag Tech (kể cả tag được thêm), nên Hack In không quy đổi được gì.
+- Cerebro không ảnh hưởng điểm cuối game.
+- Blank và "blanked unless/if" được kích hoạt theo thứ tự người chơi chọn (web thử mọi thứ tự).
