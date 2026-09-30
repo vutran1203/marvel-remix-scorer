@@ -39,3 +39,11 @@ describe('bộ bài', () => {
     expect(performance.now() - start).toBeLessThan(3000)
   })
 })
+
+describe('giới hạn phương án', () => {
+  it('tay bài nhiều lựa chọn thực tế vẫn ra điểm tối ưu', () => {
+    const r = play(['moira-mactaggert', 'shuri', 'vision', 'x-jet', 'rogue', 'storm', 'sauron'])
+    expect(r.total).toBe(100)
+    expect(r.truncated).toBe(false)
+  })
+})

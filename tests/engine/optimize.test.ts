@@ -38,10 +38,11 @@ describe('scoreHand', () => {
     })
     const r = scoreHand([many, villain])
     expect(r.total).toBe(MAX_SCENARIOS - 1)
+    expect(r.truncated).toBe(true)
   })
 
   it('lá có choices nhưng không có lựa chọn nào vẫn tính được', () => {
     const empty = fake('e', { power: 2, rule: { choices: () => [] } })
-    expect(scoreHand([empty, villain]).total).toBe(2)
+    expect(scoreHand([empty, villain])).toMatchObject({ total: 2, truncated: false })
   })
 })

@@ -4,7 +4,7 @@ import { scoreResolved, type HandResult } from './score'
 import type { CardDef, HandInput, Option } from './types'
 
 /** Giới hạn số phương án để giao diện không bị treo với tay bài cực nhiều lựa chọn. */
-export const MAX_SCENARIOS = 20000
+export const MAX_SCENARIOS = 200000
 
 const NO_CHOICE: Option = { label: '', value: undefined }
 
@@ -19,16 +19,20 @@ export function scoreHand(defs: CardDef[], input: HandInput = {}): HandResult {
 
   let best: HandResult | undefined
   let n = 0
+  let truncated = false
   outer: for (const combo of product(lists)) {
     const choices = Object.fromEntries(choiceCards.map((d, i) => [d.id, combo[i].value]))
     for (const order of orders) {
-      if (n++ >= MAX_SCENARIOS) break outer
+      if (n++ >= MAX_SCENARIOS) {
+        truncated = true
+        break outer
+      }
       const scenario = { choices, order }
       const r = scoreResolved(resolve(defs, scenario, input), scenario, input)
       if (!best || r.total > best.total || (r.total === best.total && r.rawTotal > best.rawTotal)) {
-        best = { ...r, choiceLabels: combo.map(o => o.label).filter(Boolean) }
+        best = { ...r, choiceLabels: combo.map(o => o.label).filter(Boolean), truncated: false }
       }
     }
   }
-  return best!
+  return { ...best!, truncated }
 }

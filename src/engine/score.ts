@@ -25,11 +25,13 @@ export interface HandResult {
   /** Điểm không gắn với lá đang hoạt động (Loki). */
   extras: Bonus[]
   choiceLabels: string[]
+  /** Chạm giới hạn MAX_SCENARIOS: điểm có thể chưa tối ưu. */
+  truncated: boolean
 }
 
 const sum = (xs: number[]) => xs.reduce((a, b) => a + b, 0)
 
-export function scoreResolved(cards: LiveCard[], scenario: Scenario, input: HandInput): Omit<HandResult, 'choiceLabels'> {
+export function scoreResolved(cards: LiveCard[], scenario: Scenario, input: HandInput): Omit<HandResult, 'choiceLabels' | 'truncated'> {
   const active = cards.filter(c => !c.blanked)
   const valid =
     active.some(c => c.face.type === 'HERO' || c.face.type === 'ALLY') && active.some(c => c.face.type === 'VILLAIN')

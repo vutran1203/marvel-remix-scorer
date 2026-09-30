@@ -108,6 +108,7 @@ export function handWarnings(player: Player, result: HandResult): string[] {
   const out: string[] = []
   if (player.hand.length > 0 && !result.valid) out.push('Thiếu HERO/ALLY hoặc VILLAIN (không bị blank) → tay bài 0 điểm.')
   const needsLoki = player.hand.some(id => getCard(id).rule.input === 'lokiDraw')
+  if (result.truncated) out.push('Tay bài có quá nhiều lựa chọn — điểm có thể chưa phải cao nhất.')
   if (needsLoki && player.lokiDraw === undefined) out.push('Chưa nhập power lá Loki rút — đang tính là 0.')
   return out
 }
