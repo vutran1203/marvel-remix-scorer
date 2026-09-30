@@ -45,3 +45,30 @@ describe('màn chọn bài', () => {
     expect(screen.getByText('Chưa nhập power lá Loki rút — đang tính là 0.')).toBeTruthy()
   })
 })
+
+describe('màn kết quả', () => {
+  it('xếp hạng, đánh dấu người thắng và mở bảng giải thích', () => {
+    render(<App />)
+    fireEvent.click(screen.getByText('Bắt đầu tính điểm'))
+    fireEvent.click(screen.getByRole('button', { name: 'Angel' }))
+    fireEvent.click(screen.getByRole('tab', { name: /VILLAIN/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Magneto' }))
+    fireEvent.click(screen.getByText('Xem kết quả'))
+    const first = screen.getAllByRole('listitem')[0]
+    expect(first.textContent).toContain('Người 1')
+    expect(first.textContent).toContain('23')
+    expect(first.className).toContain('winner')
+    fireEvent.click(screen.getByText('Người 1'))
+    expect(screen.getByText('Tổng')).toBeTruthy()
+    expect(screen.getByText('Magneto')).toBeTruthy()
+  })
+
+  it('người chưa có VILLAIN được 0 và có giải thích', () => {
+    render(<App />)
+    fireEvent.click(screen.getByText('Bắt đầu tính điểm'))
+    fireEvent.click(screen.getByRole('button', { name: 'Angel' }))
+    fireEvent.click(screen.getByText('Xem kết quả'))
+    fireEvent.click(screen.getByText('Người 1'))
+    expect(screen.getByText(/Thiếu HERO\/ALLY hoặc VILLAIN hợp lệ → 0 điểm \(nếu hợp lệ sẽ là 6\)/)).toBeTruthy()
+  })
+})
