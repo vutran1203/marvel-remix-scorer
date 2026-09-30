@@ -1,7 +1,8 @@
 import type { CardDef } from '../engine/types'
 import { ALLIES, HEROES } from './heroes'
+import { CONDITIONS, EQUIPMENT, LOCATIONS, MANEUVERS } from './remix'
 
-export const CARDS: CardDef[] = [...HEROES, ...ALLIES]
+export const CARDS: CardDef[] = [...HEROES, ...ALLIES, ...CONDITIONS, ...EQUIPMENT, ...LOCATIONS, ...MANEUVERS]
 export const CARD_BY_ID = new Map(CARDS.map(c => [c.id, c]))
 
 export function getCard(id: string): CardDef {
