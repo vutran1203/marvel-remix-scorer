@@ -195,7 +195,12 @@ function PlayTable({ game, setGame, onNewGame, onQuit }: TableProps) {
           ) : (
             <div className="play-grid">
               {game.discard.map(id => (
-                <button key={id} className="play-card" disabled={!discardClickable(id)} onClick={() => onDiscardCard(id)}>
+                <button
+                  key={id}
+                  className="play-card"
+                  aria-disabled={!discardClickable(id)}
+                  onClick={() => discardClickable(id) && onDiscardCard(id)}
+                >
                   <CardImage card={getCard(id)} />
                 </button>
               ))}
@@ -216,8 +221,8 @@ function PlayTable({ game, setGame, onNewGame, onQuit }: TableProps) {
               <button
                 key={id}
                 className={`play-card ${selected === id ? 'is-selected' : ''} ${r?.blanked ? 'is-blanked' : ''} ${id === game.taken ? 'is-new' : ''}`}
-                disabled={!handClickable(id)}
-                onClick={() => setSelected(selected === id ? null : id)}
+                aria-disabled={!handClickable(id)}
+                onClick={() => handClickable(id) && setSelected(selected === id ? null : id)}
               >
                 <CardImage card={getCard(id)} transformed={r?.transformed} />
                 <span className="slot-score">{r?.total ?? 0}</span>

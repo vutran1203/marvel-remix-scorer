@@ -1,4 +1,5 @@
 import type { CardDef, CardType } from '../engine/types'
+import { useCardPreview } from './CardPreview'
 
 export const TYPE_COLORS: Record<CardType, string> = {
   HERO: '#1e88e5',
@@ -12,6 +13,7 @@ export const TYPE_COLORS: Record<CardType, string> = {
 
 export function CardImage({ card, transformed = false, className = '' }: { card: CardDef; transformed?: boolean; className?: string }) {
   const name = transformed && card.transform ? card.transform.name : card.name
+  const preview = useCardPreview(card, transformed)
   return (
     <>
       <span className="card-name" aria-hidden="true" title={name}>{name}</span>
@@ -20,6 +22,8 @@ export function CardImage({ card, transformed = false, className = '' }: { card:
         src={`${import.meta.env.BASE_URL}cards/${card.id}.webp`}
         alt={name}
         loading="lazy"
+        draggable={false}
+        {...preview}
       />
     </>
   )

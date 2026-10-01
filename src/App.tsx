@@ -1,5 +1,6 @@
 import { useEffect, useReducer, useState } from 'react'
 import { loadState, reducer, saveState } from './state/game'
+import { CardPreviewProvider } from './ui/CardPreview'
 import { PickScreen } from './ui/PickScreen'
 import { PlayMode } from './ui/PlayScreen'
 import { ResultScreen } from './ui/ResultScreen'
@@ -35,7 +36,7 @@ export default function App() {
     }
   }, [mode])
   return (
-    <>
+    <CardPreviewProvider>
       <nav className="mode-tabs" role="tablist" aria-label="Chế độ">
         <button role="tab" aria-selected={mode === 'score'} className={mode === 'score' ? 'active' : ''} onClick={() => setMode('score')}>
           Tính điểm
@@ -45,6 +46,6 @@ export default function App() {
         </button>
       </nav>
       {mode === 'play' ? <PlayMode /> : <ScoreMode />}
-    </>
+    </CardPreviewProvider>
   )
 }

@@ -44,8 +44,8 @@ export function CardLibrary({ state, dispatch }: ScreenProps) {
               key={c.id}
               aria-label={c.name}
               className={`lib-card ${owner ? 'is-taken' : ''}`}
-              disabled={!!owner || full}
-              onClick={() => dispatch({ type: 'addCard', cardId: c.id })}
+              aria-disabled={!!owner || full}
+              onClick={() => { if (!owner && !full) dispatch({ type: 'addCard', cardId: c.id }) }}
             >
               <CardImage card={c} />
               {owner && <span className="taken-label">{owner.id === player.id ? 'Trong tay' : `Đang ở tay ${owner.name}`}</span>}

@@ -123,8 +123,8 @@ footer.actions { position: fixed; left: 0; right: 0; bottom: 0; padding: 12px 16
 .play .tray { position: static; }
 .play-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 6px; }
 .play-card { padding: 0; border: 2px solid transparent; background: none; position: relative; border-radius: 8px; }
-.play-card:disabled { opacity: 1; cursor: default; }
-.discard-area .play-card:not(:disabled), .play-grid.hand .play-card:not(:disabled) { border-color: var(--border); }
+.play-card[aria-disabled='true'], .lib-card[aria-disabled='true'] { cursor: default; }
+.discard-area .play-card:not([aria-disabled='true']), .play-grid.hand .play-card:not([aria-disabled='true']) { border-color: var(--border); }
 .play-card.is-selected { border-color: var(--primary); transform: translateY(-4px); }
 .play-card.is-new { box-shadow: 0 0 0 2px var(--winner); }
 .play-card.is-blanked .card-img { filter: grayscale(1) opacity(.5); }
@@ -133,3 +133,30 @@ footer.actions { position: fixed; left: 0; right: 0; bottom: 0; padding: 12px 16
 
 .game-log { margin-top: 12px; font-size: .85rem; }
 .game-log ol { padding-left: 20px; color: var(--muted); }
+
+/* ---- xem thông tin lá (rê chuột / nhấn giữ) ---- */
+.card-img { -webkit-touch-callout: none; user-select: none; -webkit-user-select: none; }
+.card-preview {
+  background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 14px;
+  box-shadow: 0 12px 40px rgba(0,0,0,.35); padding: 14px; display: grid; gap: 10px;
+}
+.card-preview.is-hover {
+  position: fixed; right: 16px; top: 50%; transform: translateY(-50%); width: 300px;
+  max-height: calc(100vh - 32px); overflow: auto; pointer-events: none; z-index: 20;
+}
+.card-preview-backdrop {
+  position: fixed; inset: 0; z-index: 30; background: rgba(0,0,0,.55);
+  display: grid; place-items: center; padding: 16px;
+}
+.card-preview.is-pinned { width: min(380px, 100%); max-height: calc(100vh - 32px); overflow: auto; }
+.preview-img { width: 100%; max-width: 280px; justify-self: center; border-radius: 10px; display: block; }
+.preview-img.is-transformed { transform: rotate(180deg); }
+.preview-face h3 { margin: 0 0 4px; font-size: 1.15rem; }
+.preview-face + .preview-face { border-top: 1px solid var(--border); padding-top: 10px; }
+.preview-sub { margin: 0 0 2px; color: var(--muted); font-size: .8rem; }
+.preview-meta { display: flex; gap: 10px; align-items: center; margin: 0 0 6px; }
+.type-badge { color: #fff; font-size: .7rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; letter-spacing: .03em; }
+.preview-tags { list-style: none; padding: 0; margin: 0 0 6px; display: flex; flex-wrap: wrap; gap: 4px; }
+.preview-tags li { font-size: .78rem; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--border); }
+.preview-text { margin: 0; font-size: 1rem; line-height: 1.4; }
+@media (max-width: 700px) { .card-preview.is-hover { display: none; } }
