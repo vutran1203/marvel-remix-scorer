@@ -50,12 +50,32 @@ describe('lượt chơi', () => {
 
   it('khu bỏ bài đủ 10 lá thì hết ván', () => {
     let g = game()
+    expect(g.discardLimit).toBe(DISCARD_LIMIT)
     for (let i = 0; i < DISCARD_LIMIT; i++) {
       g = draw(g, 'remix')
       g = discard(g, current(g).hand[0])
     }
     expect(g.phase).toBe('over')
     expect(g.discard).toHaveLength(DISCARD_LIMIT)
+  })
+
+  it('số lá tối đa ở khu bỏ bài tùy chỉnh được, có giới hạn 5–20', () => {
+    const opts = { name: 'Vũ', bots: 2, difficulty: 'hard' as const }
+    expect(newPlayGame(opts, mulberry32(1)).discardLimit).toBe(DISCARD_LIMIT)
+    expect(newPlayGame({ ...opts, discardLimit: 2 }, mulberry32(1)).discardLimit).toBe(5)
+    expect(newPlayGame({ ...opts, discardLimit: 99 }, mulberry32(1)).discardLimit).toBe(20)
+    let g = newPlayGame({ ...opts, discardLimit: 6 }, mulberry32(1))
+    for (let i = 0; i < 6; i++) g = discard(draw(g, 'remix'), current(draw(g, 'remix')).hand[0])
+    expect(g.phase).toBe('over')
+    expect(g.log).toContain('Khu bỏ bài đủ 6 lá — hết ván!')
+  })
+
+  it('hết cả hai chồng bài thì hết ván dù khu bỏ bài chưa đủ', () => {
+    let g = game()
+    g = { ...g, remix: g.remix.slice(-1), villain: [], discard: [] }
+    g = discard(draw(g, 'remix'), current(draw(g, 'remix')).hand[0])
+    expect(g.phase).toBe('over')
+    expect(g.discard).toHaveLength(1)
   })
 
   it('Loki cuối ván rút lá trên cùng REMIX', () => {
@@ -98,6 +118,8 @@ describe('lưu trữ', () => {
     const g = game()
     expect(parsePlayGame(JSON.stringify(g))).toEqual(g)
     expect(parsePlayGame('{bad')).toBeUndefined()
+    const { discardLimit: _, ...old } = g
+    expect(parsePlayGame(JSON.stringify(old))?.discardLimit).toBe(DISCARD_LIMIT)
     expect(parsePlayGame(JSON.stringify({ ...g, discard: [g.remix[0]] }))).toBeUndefined()
   })
 })

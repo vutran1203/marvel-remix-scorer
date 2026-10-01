@@ -4,7 +4,7 @@ import { scoreHand } from '../engine/optimize'
 import { playBotTurn } from '../game/bot'
 import { runBot } from '../game/runBot'
 import {
-  DISCARD_LIMIT, MAX_BOTS, MIN_BOTS, PLAY_STORAGE_KEY, canDiscard, canDraw, cerebroSwap, cerebroSwaps, current, discard,
+  DISCARD_LIMIT, MAX_BOTS, MAX_DISCARD_LIMIT, MIN_BOTS, MIN_DISCARD_LIMIT, PLAY_STORAGE_KEY, canDiscard, canDraw, cerebroSwap, cerebroSwaps, current, discard,
   draw, lokiDraw, newPlayGame, parsePlayGame, skipCerebro, type Difficulty, type NewGameOptions, type PlayGame,
 } from '../game/state'
 import { CardImage } from './CardImage'
@@ -33,7 +33,7 @@ function save(g: PlayGame | undefined) {
 
 export function PlayMode() {
   const [game, setGame] = useState<PlayGame | undefined>(load)
-  const [opts, setOpts] = useState<NewGameOptions>({ name: 'Bạn', bots: 2, difficulty: 'hard' })
+  const [opts, setOpts] = useState<NewGameOptions>({ name: 'Bạn', bots: 2, difficulty: 'hard', discardLimit: DISCARD_LIMIT })
   useEffect(() => save(game), [game])
 
   if (!game) return <PlaySetup opts={opts} setOpts={setOpts} onStart={() => setGame(newPlayGame(opts))} />
@@ -51,7 +51,7 @@ function PlaySetup({ opts, setOpts, onStart }: { opts: NewGameOptions; setOpts: 
   return (
     <main className="screen">
       <h1>Chơi với máy</h1>
-      <p className="hint">Mỗi lượt rút 1 lá (REMIX, VILLAIN hoặc khu bỏ bài) rồi bỏ 1 lá. Khu bỏ bài đủ {DISCARD_LIMIT} lá thì hết ván.</p>
+      <p className="hint">Mỗi lượt rút 1 lá (REMIX, VILLAIN hoặc khu bỏ bài) rồi bỏ 1 lá. Khu bỏ bài đủ {opts.discardLimit} lá thì hết ván.</p>
       <div className="play-setup">
         <label>
           Tên của bạn
@@ -65,6 +65,18 @@ function PlaySetup({ opts, setOpts, onStart }: { opts: NewGameOptions; setOpts: 
             max={MAX_BOTS}
             value={opts.bots}
             onChange={e => setOpts({ ...opts, bots: Number(e.target.value) })}
+          />
+        </label>
+        <label>
+          Số lá tối đa ở khu bỏ bài: <strong>{opts.discardLimit}</strong>
+          {opts.discardLimit === DISCARD_LIMIT && <small className="hint"> (luật gốc)</small>}
+          <input
+            type="range"
+            aria-label="Số lá tối đa ở khu bỏ bài"
+            min={MIN_DISCARD_LIMIT}
+            max={MAX_DISCARD_LIMIT}
+            value={opts.discardLimit}
+            onChange={e => setOpts({ ...opts, discardLimit: Number(e.target.value) })}
           />
         </label>
         <div className="segmented" role="radiogroup" aria-label="Độ khó">
@@ -189,7 +201,7 @@ function PlayTable({ game, setGame, onNewGame, onQuit }: TableProps) {
           ))}
         </div>
         <div className="discard-area">
-          <h2>Khu bỏ bài {game.discard.length}/{DISCARD_LIMIT}</h2>
+          <h2>Khu bỏ bài {game.discard.length}/{game.discardLimit}</h2>
           {game.discard.length === 0 ? (
             <p className="hint">Chưa có lá nào.</p>
           ) : (

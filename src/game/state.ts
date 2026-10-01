@@ -2,7 +2,10 @@ import { CARDS, CARD_BY_ID, getCard } from '../data'
 import { hasTagAnyFace } from '../engine/helpers'
 import { shuffle, type Rng } from './rng'
 
+/** Luật gốc: khu bỏ bài đủ 10 lá thì hết ván. */
 export const DISCARD_LIMIT = 10
+export const MIN_DISCARD_LIMIT = 5
+export const MAX_DISCARD_LIMIT = 20
 export const MIN_BOTS = 1
 export const MAX_BOTS = 5
 export const STARTING_REMIX = 6
@@ -30,6 +33,8 @@ export interface PlayGame {
   seats: Seat[]
   turn: number
   phase: Phase
+  /** Khu bỏ bài đủ ngần này lá thì hết ván. */
+  discardLimit: number
   /** Lá vừa lấy từ khu bỏ bài — không được bỏ lại ngay. */
   taken?: string
   log: string[]
@@ -39,6 +44,7 @@ export interface NewGameOptions {
   name: string
   bots: number
   difficulty: Difficulty
+  discardLimit?: number
 }
 
 const ids = (deck: 'REMIX' | 'VILLAIN') => CARDS.filter(c => c.deck === deck).map(c => c.id)
@@ -54,7 +60,12 @@ export function newPlayGame(opts: NewGameOptions, rng: Rng = Math.random): PlayG
   ]
   for (const s of seats) s.hand = [...remix.splice(-STARTING_REMIX), ...villain.splice(-1)]
   const turn = Math.floor(rng() * seats.length)
-  return { remix, villain, discard: [], seats, turn, phase: 'draw', log: [`${seats[turn].name} đi trước.`] }
+  const discardLimit = clampLimit(opts.discardLimit)
+  return { remix, villain, discard: [], seats, turn, phase: 'draw', discardLimit, log: [`${seats[turn].name} đi trước.`] }
+}
+
+function clampLimit(n: unknown): number {
+  return Number.isInteger(n) ? Math.max(MIN_DISCARD_LIMIT, Math.min(MAX_DISCARD_LIMIT, n as number)) : DISCARD_LIMIT
 }
 
 export const current = (g: PlayGame) => g.seats[g.turn]
@@ -133,16 +144,18 @@ export function discard(g: PlayGame, cardId: string): PlayGame {
     taken: undefined,
     log: [...g.log, `${current(g).name} bỏ ${nameOf(cardId)}.`],
   }
-  if (next.discard.length >= DISCARD_LIMIT) return endGame(next)
+  if (next.discard.length >= g.discardLimit) return endGame(next, `Khu bỏ bài đủ ${g.discardLimit} lá — hết ván!`)
+  // Hết cả hai chồng bài thì khu bỏ bài không thể tăng thêm: kết thúc luôn để ván không bị kẹt.
+  if (next.remix.length === 0 && next.villain.length === 0) return endGame(next, 'Hết bài trong cả hai chồng — hết ván!')
   return { ...next, turn: (g.turn + 1) % g.seats.length, phase: 'draw' }
 }
 
 /** Hết ván: ai có Loki rút lá trên cùng của REMIX (lần lượt theo thứ tự ghế). */
-function endGame(g: PlayGame): PlayGame {
+function endGame(g: PlayGame, reason: string): PlayGame {
   const remix = [...g.remix]
   const seats = g.seats.map(s => (s.hand.includes('loki') && remix.length > 0 ? { ...s, lokiCard: remix.pop() } : s))
   const loki = seats.filter(s => s.lokiCard).map(s => `Loki của ${s.name} rút ${nameOf(s.lokiCard!)} (−${getCard(s.lokiCard!).power}).`)
-  return { ...g, remix, seats, phase: 'over', log: [...g.log, 'Khu bỏ bài đủ 10 lá — hết ván!', ...loki] }
+  return { ...g, remix, seats, phase: 'over', log: [...g.log, reason, ...loki] }
 }
 
 export const lokiDraw = (s: Seat) => (s.lokiCard ? getCard(s.lokiCard).power : undefined)
@@ -160,7 +173,7 @@ export function parsePlayGame(raw: string | null | undefined): PlayGame | undefi
     if (!['draw', 'cerebro', 'discard', 'over'].includes(g.phase) || !g.seats[g.turn] || !Array.isArray(g.log)) return undefined
     const all = [...g.remix, ...g.villain, ...g.discard, ...g.seats.flatMap(s => s.hand)]
     if (new Set(all).size !== all.length) return undefined
-    return g
+    return { ...g, discardLimit: clampLimit(g.discardLimit) }
   } catch {
     return undefined
   }
