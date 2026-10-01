@@ -46,6 +46,12 @@ describe('HERO/ALLY', () => {
     expect(r.choiceLabels).toEqual(['Rogue: chép Hawkeye + Tech'])
   })
 
+  it('nhãn Rogue ghi tên mặt đang hiển thị của lá bị chép', () => {
+    const r = play(['rogue', 'bruce-banner', 'she-hulk', 'abomination'])
+    expect(cardOf(r, 'rogue').power).toBe(13)
+    expect(r.choiceLabels).toEqual(['Rogue: chép Hulk + Gamma'])
+  })
+
   it('Tony Stark transform thành Iron Man với 2 Intel', () => {
     const r = play(['tony-stark', 'moira-mactaggert', 'cerebro', 'taskmaster'])
     expect(cardOf(r, 'tony-stark')).toMatchObject({ transformed: true, name: 'Iron Man' })

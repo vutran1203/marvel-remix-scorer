@@ -13,11 +13,14 @@ export const TYPE_COLORS: Record<CardType, string> = {
 export function CardImage({ card, transformed = false, className = '' }: { card: CardDef; transformed?: boolean; className?: string }) {
   const name = transformed && card.transform ? card.transform.name : card.name
   return (
-    <img
-      className={`card-img ${transformed ? 'is-transformed' : ''} ${className}`}
-      src={`${import.meta.env.BASE_URL}cards/${card.id}.webp`}
-      alt={name}
-      loading="lazy"
-    />
+    <>
+      <span className="card-name" aria-hidden="true" title={name}>{name}</span>
+      <img
+        className={`card-img ${transformed ? 'is-transformed' : ''} ${className}`}
+        src={`${import.meta.env.BASE_URL}cards/${card.id}.webp`}
+        alt={name}
+        loading="lazy"
+      />
+    </>
   )
 }

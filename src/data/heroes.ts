@@ -3,7 +3,7 @@ import {
   NONE, applyDouble, combine, countTags, countType, faceTags, findActive, forEachTag, forEachType,
   hasName, hasTypeWithTag, makeBonus, mutantHeroes, when, withUrbanLocation, type TagPick,
 } from '../engine/helpers'
-import { STAGE, type Option, type Tag } from '../engine/types'
+import { STAGE, type LiveCard, type Option, type Tag } from '../engine/types'
 import { ally, hero } from './define'
 
 const VISION_TAGS: Tag[] = ['Strength', 'Flight', 'Tech', 'Range']
@@ -68,7 +68,10 @@ export const HEROES = [
           .filter(d => d !== self && d.type === 'HERO')
           .flatMap(d =>
             [undefined, ...faceTags(d)].map(tag => ({
-              label: `Rogue: chép ${d.name}${tag ? ` + ${tag}` : ''}`,
+              label: (cards: LiveCard[]) => {
+                const name = cards.find(c => c.def.id === d.id)?.face.name ?? d.name
+                return `Rogue: chép ${name}${tag ? ` + ${tag}` : ''}`
+              },
               value: { id: d.id, tag } satisfies RogueChoice,
             })),
           ),

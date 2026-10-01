@@ -28,9 +28,11 @@ export function scoreHand(defs: CardDef[], input: HandInput = {}): HandResult {
         break outer
       }
       const scenario = { choices, order }
-      const r = scoreResolved(resolve(defs, scenario, input), scenario, input)
+      const cards = resolve(defs, scenario, input)
+      const r = scoreResolved(cards, scenario, input)
       if (!best || r.total > best.total || (r.total === best.total && r.rawTotal > best.rawTotal)) {
-        best = { ...r, choiceLabels: combo.map(o => o.label).filter(Boolean), truncated: false }
+        const choiceLabels = combo.map(o => (typeof o.label === 'function' ? o.label(cards) : o.label)).filter(Boolean)
+        best = { ...r, choiceLabels, truncated: false }
       }
     }
   }

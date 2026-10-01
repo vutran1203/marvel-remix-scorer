@@ -64,8 +64,8 @@ export interface Bonus {
 }
 
 export interface Option {
-  /** Rỗng = không cần hiển thị. */
-  label: string
+  /** Rỗng = không cần hiển thị. Dạng hàm: tính từ tay bài đã giải (vd. tên mặt sau transform). */
+  label: string | ((cards: LiveCard[]) => string)
   value: unknown
 }
 
