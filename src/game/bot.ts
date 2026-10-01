@@ -1,7 +1,7 @@
 import { CARDS, getCard } from '../data'
 import { scoreHand } from '../engine/optimize'
 import type { Rng } from './rng'
-import { canDraw, current, discard, draw, skipCerebro, type PlayGame } from './state'
+import { canDraw, current, discard, draw, skipCerebro, type Difficulty, type PlayGame } from './state'
 
 /** Bot không biết lá Loki sẽ rút: dùng power trung bình của bộ REMIX. */
 const AVG_REMIX_POWER = Math.round(
@@ -9,8 +9,10 @@ const AVG_REMIX_POWER = Math.round(
 )
 /** Tay chưa hợp lệ vẫn cần hướng đi: lấy điểm thô trừ phạt. */
 const INVALID_PENALTY = 40
-/** Bot "Khó" chỉ lấy lá ở khu bỏ bài nếu lợi hơn rút mù ít nhất ngần này điểm. */
-const TAKE_THRESHOLD = 3
+/** Chỉ lấy lá ở khu bỏ bài nếu tay bài tăng ít nhất ngần này điểm. */
+const TAKE_THRESHOLD: Record<Difficulty, number> = { hard: 3, easy: 8 }
+/** Bot "Dễ" chỉ để ý tới khu bỏ bài với xác suất này. */
+const EASY_LOOKS_AT_DISCARD = 0.5
 /** Bot "Dễ" bỏ lá tốt nhất với xác suất này, còn lại bỏ ngẫu nhiên. */
 const EASY_SMART = 0.7
 
@@ -44,18 +46,15 @@ export function playBotTurn(g: PlayGame, rng: Rng = Math.random): PlayGame {
   const cache = new Map<string, number>()
   const blind: 'remix' | 'villain' = !hasVillain(seat.hand) && canDraw(g, 'villain') ? 'villain' : canDraw(g, 'remix') ? 'remix' : 'villain'
 
-  let next = g
-  if (seat.bot === 'hard') {
+  let pick: { card: string; value: number } | undefined
+  if (seat.bot === 'hard' || rng() < EASY_LOOKS_AT_DISCARD) {
     const now = evaluate(seat.hand, cache)
-    let pick: { card: string; value: number } | undefined
     for (const d of g.discard) {
       const v = bestDiscard([...seat.hand, d], d, cache).value
-      if (v >= now + TAKE_THRESHOLD && (!pick || v > pick.value)) pick = { card: d, value: v }
+      if (v >= now + TAKE_THRESHOLD[seat.bot] && (!pick || v > pick.value)) pick = { card: d, value: v }
     }
-    next = pick ? draw(g, 'discard', pick.card) : draw(g, blind)
-  } else {
-    next = draw(g, blind)
   }
+  let next = pick ? draw(g, 'discard', pick.card) : draw(g, blind)
   if (next === g) return g
   next = skipCerebro(next)
 

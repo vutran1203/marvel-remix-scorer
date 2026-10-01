@@ -25,8 +25,8 @@ describe('bot', () => {
     expect(g.phase).toBe('over')
   }, 60000)
 
-  it('bot Khó lấy lá ở khu bỏ bài khi lá đó tăng điểm rõ', () => {
-    let g = newPlayGame({ name: 'Vũ', bots: 1, difficulty: 'hard' }, mulberry32(3))
+  it.each(['easy', 'hard'] as const)('bot %s lấy lá ở khu bỏ bài khi lá đó tăng điểm rõ', difficulty => {
+    let g = newPlayGame({ name: 'Vũ', bots: 1, difficulty }, mulberry32(3))
     const bot = g.seats[1]
     const hand = ['storm', 'cyclops', 'hawkeye', 'jean-grey', 'sauron', 'angel', 'forge']
     const rest = allCards(g).filter(id => !hand.includes(id) && id !== 'avoid-crossfire')
@@ -38,7 +38,7 @@ describe('bot', () => {
       remix: rest.filter(id => !id.match(/^(abomination|black-cat|hela|baron-zemo|juggernaut|kang|killmonger|kingpin|loki|magneto|mystique|selene|sentinels|taskmaster|the-leader|toad|ultron)$/)),
       villain: [],
     }
-    const after = playBotTurn(g)
+    const after = playBotTurn(g, () => 0)
     expect(after.seats[1].hand).toContain('avoid-crossfire')
     expect(evaluate(after.seats[1].hand)).toBeGreaterThan(evaluate(hand))
   })
